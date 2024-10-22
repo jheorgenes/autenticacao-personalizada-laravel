@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -14,7 +15,7 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function authenticate(Request $request)
+    public function authenticate(Request $request): RedirectResponse
     {
         // Validação do formulário
         $credentials = $request->validate(
@@ -61,7 +62,7 @@ class AuthController extends Controller
             // Retornar os inputs preenchidos
             // retornando uma mensagem:
             return back()->withInput()->with([
-                'invalid_login' => 'Login inválidoooooo.'
+                'invalid_login' => 'Login inválido.'
             ]);
         }
 
@@ -83,5 +84,12 @@ class AuthController extends Controller
         // redirecionar
         // Redireciona para a rota chamada ou home se não tiver uma rota específica
         return redirect()->intended(route('home'));
+    }
+
+    public function logout(): RedirectResponse
+    {
+        //logout
+        Auth::logout();
+        return redirect()->route('login');
     }
 }

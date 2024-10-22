@@ -9,9 +9,9 @@
                         @csrf
                         <div class="mb-3">
                             <label for="username" class="form-label">Usuário</label>
-                            <input type="text" class="form-control" id="username" name="username">
+                            <input type="text" class="form-control" id="username" name="username" value="{{ old('username') }}"><!-- Inserindo o atributo value com a função old() que recupera o valor preenchido -->
                             @error('username')
-                            <div class="text-danger">{{ $message }}</div>
+                                <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -19,7 +19,7 @@
                             <label for="password" class="form-label">Senha</label>
                             <input type="password" class="form-control" id="password" name="password">
                             @error('password')
-                            <div class="text-danger">{{ $message }}</div>
+                                <div class="text-danger">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -51,4 +51,3 @@
         </div>
     </div>
 </x-layouts.main-layout>
-
