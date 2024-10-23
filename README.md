@@ -9,6 +9,12 @@ composer update
 
 ## Adicionando Mailable no projeto
 
-````sh
+```sh
 $ php artisan make:mail nomeEscolhido
+```
+
+Como adicionar um componente no laravel somente de view
+
+```sh
+$ php artisan make:component NomeComponente --view
 ```

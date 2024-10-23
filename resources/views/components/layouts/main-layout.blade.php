@@ -13,6 +13,10 @@
 
 <body>
 
+    @auth
+        <x-user-bar /><!-- Inserindo um componente de user-bar em todas as páginas usando esse layout -->
+    @endauth
+
     {{ $slot }}
 
     <script src="{{ asset('assets/bootstrap/bootstrap.bundle.min.js') }}"></script>
