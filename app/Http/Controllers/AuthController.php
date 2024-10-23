@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewUserConfirmation;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 use Illuminate\Support\Str; //Inserido manualmente
 
@@ -99,7 +102,7 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    public function store_user(Request $request): void
+    public function store_user(Request $request): RedirectResponse|View
     {
         // Form validation
         $request->validate(
@@ -133,6 +136,45 @@ class AuthController extends Controller
         $user->password = bcrypt($request->password);
         $user->token = Str::random(64); //Definindo um token rondomico
 
-        dd($user);
+        // gerar link
+        $confirmation_link = route('new_user_confirmation', ['token' => $user->token]);
+
+        // enviar email
+        $result = Mail::to($user->email)->send(new NewUserConfirmation($user->username, $confirmation_link));
+
+        // Verificando se o email foi enviado com sucesso
+        if(!$result){
+            return back()->withInput()->with([
+                'server_error' => 'Ocorreu um erro ao enviar o email de confirmação.'
+            ]);
+        }
+
+        // Criando usuário no banco de dados
+        $user->save();
+
+        // Apresentando view de sucesso
+        return view('auth.email_sent', ['email' => $user->email]);
+    }
+
+    public function new_user_confirmation($token)
+    {
+        // Verificar se o token é válido
+        $user = User::where('token', $token)->first();
+        if(!$user){
+            // Se o token for inválido, nem vai apresentar mensagem de erro: vai ser redirecionado para login
+            return redirect()->route('login');
+        }
+
+        // Confirmar o registro do usuário
+        $user->email_verified_at = Carbon::now();
+        $user->token = null;
+        $user->active = true;
+        $user->save();
+
+        // Autenticação automática (login) do usuário confirmado
+        Auth::login($user);
+
+        // Apresenta uma mensagem de sucesso
+        return view('auth.new_user_confirmation');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -16,7 +17,7 @@ class NewUserConfirmation extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct(public $username, public $confirmation_link)
     {
         //
     }
@@ -27,7 +28,8 @@ class NewUserConfirmation extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New User Confirmation',
+            from: new Address('laravel@gmail.com', 'Laravel'),
+            subject: 'Confirmação de cadastro',
         );
     }
 
@@ -37,7 +39,7 @@ class NewUserConfirmation extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'view.name',
+            view: 'mail.new_user_confirmation',
         );
     }
 
