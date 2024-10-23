@@ -177,4 +177,14 @@ class AuthController extends Controller
         // Apresenta uma mensagem de sucesso
         return view('auth.new_user_confirmation');
     }
+
+    public function profile(): View
+    {
+        return view('auth.profile');
+    }
+
+    public function change_password(Request $request)
+    {
+        echo 'change_password';
+    }
 }
