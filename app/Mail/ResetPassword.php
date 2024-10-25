@@ -5,19 +5,19 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NewUserConfirmation extends Mailable
+class ResetPassword extends Mailable
 {
     use Queueable, SerializesModels;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(public $username, public $confirmation_link)
+    public function __construct(public $username, public $token_link)
     {
         //
     }
@@ -30,7 +30,7 @@ class NewUserConfirmation extends Mailable
         // Definindo quem vai enviar o e-mail e o título do email
         return new Envelope(
             from: new Address('laravel@gmail.com', 'Laravel'),
-            subject: 'Confirmação de cadastro',
+            subject: 'Recuperação de senha',
         );
     }
 
@@ -41,7 +41,7 @@ class NewUserConfirmation extends Mailable
     {
         // Definindo a view que será chamada e enviada como conteúdo do e-mail
         return new Content(
-            view: 'mail.new_user_confirmation',
+            view: 'mail.reset_password',
         );
     }
 

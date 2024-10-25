@@ -28,10 +28,10 @@
                                 <div class="mb-3">
                                     <a href="{{ route('register') }}">Não tenho conta de usuário</a>
                                 </div>
-                                {{--
+
                                 <div>
-                                    <a href="#">Esqueci a minha senha</a>
-                                </div> --}}
+                                    <a href="{{ route('forgot_password') }}">Esqueci a minha senha</a>
+                                </div>
                             </div>
                             <div class="col text-end align-self-center">
                                 <button type="submit" class="btn btn-secondary px-5">ENTRAR</button>
@@ -46,7 +46,11 @@
                         </div>
                     @endif
 
-
+                    @if (session('success'))
+                        <div class="mt-3 alert alert-success text-center p-2">
+                            Senha redefinida com sucesso.
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

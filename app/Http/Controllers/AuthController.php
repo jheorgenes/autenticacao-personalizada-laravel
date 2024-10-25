@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\NewUserConfirmation;
+use App\Mail\ResetPassword;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
@@ -224,6 +225,106 @@ class AuthController extends Controller
         // Apresentar uma mensagem de sucesso
         return redirect()->route('profile')->with([
             'success' => 'Senha alterada com sucesso'
+        ]);
+    }
+
+    public function forgot_password(): View
+    {
+        return view('auth.forgot_password');
+    }
+
+    public function send_reset_password_link(Request $request)
+    {
+        // form validation
+        $request->validate(
+            [
+                'email' => 'required|email'
+            ],
+            [
+                'email.required' => 'O email é obrigatório',
+                'email.email' => 'O email deve ser um endereço de email válido'
+            ]
+        );
+
+        // verificar se o email existe
+        $generic_message = "Verifique a sua caixa de correio para prosseguir com a recuperação de senha";
+
+        // verificar se email existe
+        $user = User::where('email', $request->email)->first();
+        if(!$user) {
+            return back()->with([
+                'server_message' => $generic_message
+            ]);
+        }
+
+        // criando o link com o token para enviar no email
+        $user->token = Str::random(64);
+
+        $token_link = route('reset_password', ['token' => $user->token]);
+
+        // enviando email com o link para recuperar a senha
+        $result = Mail::to($user->email)->send(new ResetPassword($user->username, $token_link));
+
+        // verificar se o email foi enviado
+        if(!$result) {
+            // Será enviado uma mensagem genérica de que o e-mail foi enviado com sucesso, porém o serviço será interrompido aqui e não será guardado o token no banco de dados
+            return back()->with([
+                'server_message' => $generic_message
+            ]);
+        }
+
+        // guardando o token na base de dados
+        $user->save();
+
+        return back()->with([
+            'server_message' => $generic_message
+        ]);
+    }
+
+    public function reset_password($token): View | RedirectResponse
+    {
+        // verificar se o token é válido
+        $user = User::where('token', $token)->first();
+        if(!$user){
+            return redirect()->route('login');
+        }
+
+        // Chamando a view dentro de AUTH.reset_password, que é diferente da view de email.reset_password
+        return view('auth.reset_password', ['token' => $token]);
+    }
+
+    public function reset_password_update(Request $request): RedirectResponse
+    {
+        // form validation
+        $request->validate(
+            [
+                'token' => 'required',
+                'new_password' => 'required|min:8|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
+                'new_password_confirmation' => 'required|same:new_password'
+            ],
+            [
+                'new_password.required' => 'A nova senha é obrigatória.',
+                'new_password.min' => 'A nova senha deve conter no mínimo :min caracteres.',
+                'new_password.max' => 'A nova senha deve conter no máximo :max caracteres.',
+                'new_password.regex' => 'A nova senha deve conter pelo menos uma letra maiúscula, uma letra minúscula e um número.',
+                'new_password_confirmation.required' => 'A confirmação da nova senha é obrigatória.',
+                'new_password_confirmation.same' => 'A confirmação da nova senha deve ser igual à nova senha.',
+            ]
+        );
+
+        // verificando se o token é válido
+        $user = User::where('token', $request->token)->first();
+        if(!$user){
+            return redirect()->route('login');
+        }
+
+        // Atualizar a senha do user na base de dados
+        $user->password = bcrypt($request->new_password);
+        $user->token = null;
+        $user->save();
+
+        return redirect()->route('login')->with([
+            'success' => true
         ]);
     }
 }
