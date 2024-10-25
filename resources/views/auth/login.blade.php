@@ -51,6 +51,12 @@
                             Senha redefinida com sucesso.
                         </div>
                     @endif
+
+                    @if (session('account_deleted'))
+                        <div class="mt-3 alert alert-success text-center p-2">
+                            Conta de usuário removida com sucesso.
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
